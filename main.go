@@ -14,6 +14,7 @@ const (
 	iterationTimeout    = time.Second
 	counterDotInterval  = 10
 	counterNewLine      = counterDotInterval * 100
+	testDuration        = time.Minute * 10
 )
 
 func iteration() error {
@@ -68,8 +69,14 @@ func iteration() error {
 }
 
 func main() {
+	start := time.Now()
 	counter := 0
 	for {
+		if time.Since(start) > testDuration {
+			fmt.Println()
+			fmt.Println("OK")
+			return
+		}
 		if err := iteration(); err != nil {
 			log.Println()
 			log.Printf("counter: %d", counter)
