@@ -11,7 +11,7 @@ import (
 const (
 	addCountInIteration = 100
 	goroutinesCount     = 1000
-	iterationTimeout    = time.Second
+	iterationTimeout    = time.Second * 10
 	counterDotInterval  = 10
 	counterNewLine      = counterDotInterval * 100
 	testDuration        = time.Minute * 10
