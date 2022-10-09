@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	goroutinesCount    = 2000
+	goroutinesCount    = 100
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
 	counterNewLine     = counterDotInterval * 100
@@ -18,6 +18,7 @@ const (
 
 func iteration() error {
 	var wg sync.WaitGroup
+	var m sync.Mutex
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
@@ -25,7 +26,8 @@ func iteration() error {
 			defer wg.Done()
 
 			for k := 0; k < lockCount; k++ {
-				runtime.Gosched()
+				m.Lock()
+				m.Unlock()
 			}
 
 		}()
