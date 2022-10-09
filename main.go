@@ -12,6 +12,7 @@ const (
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
 	counterNewLine     = counterDotInterval * 100
+	lockCount          = 100
 	testDuration       = time.Minute * 10
 )
 
@@ -24,8 +25,10 @@ func iteration() error {
 		go func() {
 			defer wg.Done()
 
-			m.Lock()
-			m.Unlock()
+			for i := 0; i < lockCount; i++ {
+				m.Lock()
+				m.Unlock()
+			}
 
 			runtime.Gosched()
 		}()
