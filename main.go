@@ -8,40 +8,27 @@ import (
 )
 
 const (
-	addCountInIteration = 100
-	goroutinesCount     = 1000
-	iterationTimeout    = time.Second * 10
-	counterDotInterval  = 10
-	counterNewLine      = counterDotInterval * 100
-	testDuration        = time.Minute * 10
+	goroutinesCount    = 1000
+	iterationTimeout   = time.Second * 10
+	counterDotInterval = 10
+	counterNewLine     = counterDotInterval * 100
+	testDuration       = time.Minute * 10
 )
 
 func iteration() error {
-	var m sync.Mutex
 	var wg sync.WaitGroup
-	s := 0
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
-			for i := 0; i < addCountInIteration; i++ {
-				m.Lock()
-				s++
-				m.Unlock()
-			}
 			runtime.Gosched()
 		}()
 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for i := 0; i < addCountInIteration; i++ {
-				m.Lock()
-				s--
-				m.Unlock()
-			}
 			runtime.Gosched()
 		}()
 	}
@@ -57,9 +44,6 @@ func iteration() error {
 
 	select {
 	case <-completed:
-		if s != 0 {
-			return fmt.Errorf("s is not zero: %d", s)
-		}
 		return nil
 	case <-timer.C:
 		return fmt.Errorf("timeout")
