@@ -68,7 +68,7 @@ func iteration() error {
 }
 
 func main() {
-	fmt.Println("CPU:", runtime.NumCPU())
+	fmt.Println("CPU:", runtime.GOMAXPROCS(0))
 	start := time.Now()
 	counter := 0
 	for {
