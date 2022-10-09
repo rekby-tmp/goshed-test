@@ -21,8 +21,6 @@ func iteration() error {
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
-
-		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
