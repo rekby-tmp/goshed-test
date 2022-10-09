@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"sync"
 	"time"
@@ -69,6 +68,7 @@ func iteration() error {
 }
 
 func main() {
+	fmt.Println("CPU:", runtime.NumCPU())
 	start := time.Now()
 	counter := 0
 	for {
@@ -78,8 +78,8 @@ func main() {
 			return
 		}
 		if err := iteration(); err != nil {
-			log.Println()
-			log.Printf("counter: %d", counter)
+			fmt.Println()
+			fmt.Printf("\ncounter: %d\n", counter)
 			panic(err)
 		}
 		counter++
