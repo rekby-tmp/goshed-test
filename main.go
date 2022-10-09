@@ -18,19 +18,16 @@ const (
 
 func iteration() error {
 	var wg sync.WaitGroup
-	var m sync.Mutex
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
-			for i := 0; i < lockCount; i++ {
-				m.Lock()
-				m.Unlock()
+			for k := 0; k < lockCount; k++ {
+				runtime.Gosched()
 			}
 
-			runtime.Gosched()
 		}()
 	}
 
