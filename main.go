@@ -16,22 +16,20 @@ const (
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
 	statInterval       = counterDotInterval * 100
-	lockCount          = 1000
+	schedCount         = 1000
 	testDuration       = time.Minute * 10
 )
 
 func iteration() error {
 	var wg sync.WaitGroup
-	var m sync.Mutex
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
-			for k := 0; k < lockCount; k++ {
-				m.Lock()
-				m.Unlock()
+			for k := 0; k < schedCount; k++ {
+				runtime.Gosched()
 			}
 
 		}()
@@ -55,14 +53,15 @@ func iteration() error {
 
 }
 
-func printMem() {
+func printStat(d time.Duration) {
 	fmt.Println()
 
 	MB := uint64(1024 * 1024)
 	swap, _ := mem.SwapMemory()
-	fmt.Printf("swap free: %d, used: %d", swap.Free/MB, swap.Used/MB)
+	fmt.Printf("Duration: %v\n", d)
+	fmt.Printf("swap free: %d, used: %d\n", swap.Free/MB, swap.Used/MB)
 	virt, _ := mem.VirtualMemory()
-	fmt.Printf("mem free: %d, used: %d", virt.Free/MB, virt.Used/MB)
+	fmt.Printf("mem free: %d, used: %d\n", virt.Free/MB, virt.Used/MB)
 	fmt.Println()
 }
 
@@ -77,7 +76,8 @@ func main() {
 	}()
 
 	for {
-		if time.Since(start) > testDuration {
+		iterationStart := time.Now()
+		if iterationStart.Sub(start) > testDuration {
 			fmt.Println()
 			fmt.Println("OK")
 			return
@@ -85,15 +85,16 @@ func main() {
 		if err := iteration(); err != nil {
 			fmt.Println()
 			fmt.Printf("\ncounter: %d\n", counter)
-			printMem()
+			printStat(time.Since(iterationStart))
 			panic(err)
 		}
+
 		counter++
 		if counter%counterDotInterval == 0 {
 			fmt.Print(".")
 		}
 		if counter%statInterval == 0 {
-			printMem()
+			printStat(time.Since(iterationStart))
 		}
 	}
 }
