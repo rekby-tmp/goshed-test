@@ -15,8 +15,9 @@ const (
 	goroutinesCount    = 1000
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
+	firstStat          = counterDotInterval
 	statInterval       = counterDotInterval * 100
-	schedCount         = 1000
+	schedCount         = 100
 	testDuration       = time.Minute * 10
 )
 
@@ -93,7 +94,7 @@ func main() {
 		if counter%counterDotInterval == 0 {
 			fmt.Print(".")
 		}
-		if counter%statInterval == 0 {
+		if counter%statInterval == 0 || counter == firstStat {
 			printStat(time.Since(iterationStart))
 		}
 	}
