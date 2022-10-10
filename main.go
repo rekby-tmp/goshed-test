@@ -6,7 +6,6 @@ import (
 	"net/http/pprof"
 	"runtime"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/mem"
@@ -23,14 +22,18 @@ const (
 
 func iteration() error {
 	var wg sync.WaitGroup
-
-	s := int64(0)
+	var m sync.Mutex
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			atomic.AddInt64(&s, 1)
+
+			for k := 0; k < lockCount; k++ {
+				m.Lock()
+				m.Unlock()
+			}
+
 		}()
 	}
 
@@ -45,7 +48,6 @@ func iteration() error {
 
 	select {
 	case <-completed:
-		runtime.GC()
 		return nil
 	case <-timer.C:
 		return fmt.Errorf("timeout")
