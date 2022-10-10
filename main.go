@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	goroutinesCount    = 1000
-	iterationTimeout   = time.Second * 10
+	goroutinesCount    = 2000
+	iterationTimeout   = time.Minute
 	counterDotInterval = 10
 	statInterval       = counterDotInterval * 100
 	lockCount          = 1000
@@ -41,6 +41,7 @@ func iteration() error {
 			for k := 0; k < lockCount; k++ {
 				m.Lock()
 				m.Unlock()
+				runtime.Gosched()
 			}
 
 		}()
