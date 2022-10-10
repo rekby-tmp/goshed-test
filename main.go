@@ -7,6 +7,7 @@ import (
 	"net/http/pprof"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/mem"
@@ -17,7 +18,7 @@ const (
 	iterationTimeout   = time.Minute
 	counterDotInterval = 10
 	statInterval       = counterDotInterval * 100
-	lockCount          = 1000
+	lockCount          = 100
 	testDuration       = time.Minute * 10
 )
 
@@ -32,21 +33,22 @@ var (
 
 func iteration() error {
 	var wg sync.WaitGroup
-	var m sync.Mutex
-	var s int
+	//var m sync.Mutex
+	var s int64
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
 
 			for k := 0; k < lockCount; k++ {
-				m.Lock()
-				s++
-				m.Unlock()
+				//m.Lock()
+				//s++
+				//m.Unlock()
+				atomic.AddInt64(&s, 1)
 				runtime.Gosched()
 			}
 
+			wg.Done()
 		}()
 	}
 
