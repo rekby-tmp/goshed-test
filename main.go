@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	goroutinesCount    = 2000
+	goroutinesCount    = 10
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
 	counterNewLine     = counterDotInterval * 100
-	lockCount          = 100
+	lockCount          = 10000
 	testDuration       = time.Minute * 10
 )
 
