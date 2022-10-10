@@ -15,22 +15,32 @@ const (
 	goroutinesCount    = 1000
 	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
-	firstStat          = counterDotInterval
 	statInterval       = counterDotInterval * 100
-	schedCount         = 100
+	lockCount          = 1000
 	testDuration       = time.Minute * 10
+)
+
+var (
+	fixedStat = map[int]bool{
+		1:                  true,
+		50:                 true,
+		100:                true,
+		counterDotInterval: true,
+	}
 )
 
 func iteration() error {
 	var wg sync.WaitGroup
+	var m sync.Mutex
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
-			for k := 0; k < schedCount; k++ {
-				runtime.Gosched()
+			for k := 0; k < lockCount; k++ {
+				m.Lock()
+				m.Unlock()
 			}
 
 		}()
@@ -54,12 +64,12 @@ func iteration() error {
 
 }
 
-func printStat(d time.Duration) {
+func printStat(counter int, d time.Duration) {
 	fmt.Println()
 
 	MB := uint64(1024 * 1024)
 	swap, _ := mem.SwapMemory()
-	fmt.Printf("Duration: %v\n", d)
+	fmt.Printf("Counter: %d, Duration: %v\n", counter, d)
 	fmt.Printf("swap free: %d, used: %d\n", swap.Free/MB, swap.Used/MB)
 	virt, _ := mem.VirtualMemory()
 	fmt.Printf("mem free: %d, used: %d\n", virt.Free/MB, virt.Used/MB)
@@ -86,7 +96,7 @@ func main() {
 		if err := iteration(); err != nil {
 			fmt.Println()
 			fmt.Printf("\ncounter: %d\n", counter)
-			printStat(time.Since(iterationStart))
+			printStat(counter, time.Since(iterationStart))
 			panic(err)
 		}
 
@@ -94,8 +104,8 @@ func main() {
 		if counter%counterDotInterval == 0 {
 			fmt.Print(".")
 		}
-		if counter%statInterval == 0 || counter == firstStat {
-			printStat(time.Since(iterationStart))
+		if counter%statInterval == 0 || fixedStat[counter] {
+			printStat(counter, time.Since(iterationStart))
 		}
 	}
 }
