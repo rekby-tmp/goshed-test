@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/pprof"
 	"runtime"
@@ -32,6 +33,7 @@ var (
 func iteration() error {
 	var wg sync.WaitGroup
 	var m sync.Mutex
+	var s int
 
 	for i := 0; i < goroutinesCount; i++ {
 		wg.Add(1)
@@ -40,6 +42,7 @@ func iteration() error {
 
 			for k := 0; k < lockCount; k++ {
 				m.Lock()
+				s++
 				m.Unlock()
 				runtime.Gosched()
 			}
@@ -58,6 +61,7 @@ func iteration() error {
 
 	select {
 	case <-completed:
+		_, _ = io.Discard.Write([]byte(fmt.Sprintf("%d", s)))
 		return nil
 	case <-timer.C:
 		return fmt.Errorf("timeout")
