@@ -14,10 +14,10 @@ import (
 
 const (
 	goroutinesCount    = 1000
-	iterationTimeout   = time.Second * 10 * 1000
+	iterationTimeout   = time.Second * 10
 	counterDotInterval = 10
 	statInterval       = counterDotInterval * 100
-	lockCount          = 1
+	lockCount          = 1000
 	testDuration       = time.Minute * 10
 )
 
@@ -53,6 +53,17 @@ func iteration() error {
 
 }
 
+func printMem() {
+	fmt.Println()
+
+	MB := uint64(1024 * 1024)
+	swap, _ := mem.SwapMemory()
+	fmt.Printf("swap free: %d, used: %d", swap.Free/MB, swap.Used/MB)
+	virt, _ := mem.VirtualMemory()
+	fmt.Printf("mem free: %d, used: %d", virt.Free/MB, virt.Used/MB)
+	fmt.Println()
+}
+
 func main() {
 	fmt.Println("CPU:", runtime.GOMAXPROCS(0))
 	start := time.Now()
@@ -72,6 +83,7 @@ func main() {
 		if err := iteration(); err != nil {
 			fmt.Println()
 			fmt.Printf("\ncounter: %d\n", counter)
+			printMem()
 			panic(err)
 		}
 		counter++
@@ -79,14 +91,7 @@ func main() {
 			fmt.Print(".")
 		}
 		if counter%statInterval == 0 {
-			fmt.Println()
-
-			MB := uint64(1024 * 1024)
-			swap, _ := mem.SwapMemory()
-			fmt.Printf("swap free: %d, used: %d", swap.Free/MB, swap.Used/MB)
-			virt, _ := mem.VirtualMemory()
-			fmt.Printf("mem free: %d, used: %d", virt.Free/MB, virt.Used/MB)
-			fmt.Println()
+			printMem()
 		}
 	}
 }
