@@ -23,5 +23,6 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Test
-        run: go run -race main.go
+      - name: Show vars
+        run: |
+          echo job.container.id '${{ job.container.id}}'
